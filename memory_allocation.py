@@ -11,10 +11,12 @@ memory_start = None
 algorithm = 0  # 0=First Fit, 1=Best Fit
 
 def enter_parameters():
-    global pm_size, algorithm
-    # Ask user for the size of physical memory
-    # Ask user for the hole-fitting algorithm to use
-    # Initialize memory_start with the full size of the physical memory as an empty block
+    global pm_size, algorithm, memory_start
+    
+    pm_size = int(input("Enter size of physical memory: "))
+    algorithm = int(input("Enter hole-fitting algorithm (0=first fit, 1=best fit): "))
+
+    memory_start = MemoryBlock(-1, 0, pm_size)
 
 def allocate_memory():
     global memory_start, algorithm
@@ -47,9 +49,14 @@ def defragment_memory():
 
 def print_memory():
     global memory_start
-    # Print the current state of memory including ids and start-end addresses of all blocks
+    print("ID\tStart\tEnd")
+    print("-------------------")
+    current = memory_start
+    while current:
+        print(f"{current.id}\t{current.start}\t{current.end}")
+        current = current.next
 
-# ------------------
+# ------------------ Print the current state of memory including ids and start-end addresses of all blocks
 # Main Program Logic
 # ------------------
 
@@ -61,6 +68,7 @@ while True:
     print("3) Deallocate memory for block")
     print("4) Defragment memory")
     print("5) Quit program")
+    print()
     choice = int(input("Enter selection: "))
 
     if choice == 1:
