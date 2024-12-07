@@ -5,7 +5,6 @@ class MemoryBlock:
         self.end = start_address + size - 1
         self.next = None
 
-# Global variables for the memory allocator
 pm_size = 0
 memory_start = None
 algorithm = 0
@@ -51,10 +50,32 @@ def allocate_memory():
         prev.next = new_block
         new_block.next = current
 
-def first_fit(size):
-    # Implement first-fit memory allocation
-    # Return the starting address if a block is found, or None if no suitable block is found
-    pass
+def first_fit(id, size):
+    global memory_start
+
+    current = memory_start
+
+    while current:
+        if current.id == id:
+            return None
+        current = current.next
+
+    current = memory_start
+    last_end = 0
+
+    while current:
+        gap_size = current.start - last_end
+
+        if gap_size >= size:
+            return last_end
+
+        last_end = current.end + 1
+        current = current.next
+
+    if pm_size - last_end >= size:
+        return last_end
+
+    return None
 
 def best_fit(id, size):
     global memory_start
@@ -87,20 +108,54 @@ def best_fit(id, size):
     if pm_size - last_end >= size and (best_size is None or pm_size - last_end < best_size):
         best_start = last_end
         best_size = pm_size - last_end
-        
+
     return best_start
 
 def deallocate_memory():
     global memory_start
-    # Ask for the block id to deallocate
-    # Remove the block from the linked list if found
-    # Combine adjacent free spaces (if any) to form a single larger hole
+
+    block_id = int(input("Enter block id: "))
+
+    if memory_start is None:
+        print("Memory is empty.")
+        return
+
+    current = memory_start
+    prev = None
+    found = False
+
+    while current:
+        if current.id == block_id:
+            found = True
+            break
+        prev = current
+        current = current.next
+
+    if not found:
+        print(f"Block {block_id} not found.")
+        return
+
+    if prev is None:
+        memory_start = current.next
+    else:
+        prev.next = current.next
 
 def defragment_memory():
-    global memory_start
-    # Compacts the blocks to be contiguous
-    # Coalesces the holes into one large hole at the far-right end
-    # Updates the addresses of the blocks and the free space accordingly
+    global memory_start, pm_size
+
+    if memory_start is None:
+        print("Memory is empty.")
+        return
+
+    current = memory_start
+    start_address = 0
+
+    while current:
+        block_size = current.end - current.start + 1
+        current.start = start_address
+        current.end = start_address + block_size - 1
+        start_address = current.end + 1
+        current = current.next
 
 def print_memory():
     global memory_start
@@ -112,7 +167,7 @@ def print_memory():
         current = current.next
     print()
 
-# ------------------ Print the current state of memory including ids and start-end addresses of all blocks
+# ------------------
 # Main Program Logic
 # ------------------
 
@@ -134,8 +189,10 @@ while True:
         print_memory()
     elif choice == 3:
         deallocate_memory()
+        print_memory()
     elif choice == 4:
         defragment_memory()
+        print_memory()
     elif choice == 5:
         print("Quitting program...")
         break
